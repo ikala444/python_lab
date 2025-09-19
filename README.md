@@ -39,7 +39,11 @@ print(f'Итого к оплате:    {total:.2f}')
 min_all = int(input('Минуты: '))
 hour=min_all//60
 min=min_all-hour*60
-print(f'ЧЧ:ММ - {hour}:{min}')
+days=0
+if hour>=24:
+    days=hour//24
+    hour-=days*24
+print(f'Дней: {days} ЧЧ:ММ - {hour}:{min}')
 ```
 ![Картинка 1](./images/lab01/img04.png)
 
