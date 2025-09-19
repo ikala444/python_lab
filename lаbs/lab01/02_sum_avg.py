@@ -4,4 +4,4 @@ if ',' in a:
 if ',' in b:
     b=b.replace(',','.')
 print(a,b)
-print(f'a: {float(a)}\nb: {float(b)}\nsum: {round(float(a)+float(b),2)}\navg: {round((float(a)+float(b))/2,2)}')
+print(f'a: {float(a)}\nb: {float(b)}\nsum: {round(float(a)+float(b),2)}; avg: {round((float(a)+float(b))/2,2)}')
