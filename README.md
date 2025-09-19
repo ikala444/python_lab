@@ -50,6 +50,7 @@ fio_apart = fio.strip()
 words = fio_apart.split()
 initials = "".join([word[0].upper() for word in words])
 print(f'Инициалы: {initials}')
-print(f'Длина (символов): {len(fio_apart)}')
+fio_full = fio_apart.replace(' ','')
+print(f'Длина (символов): {len(fio_full)+2}')
 ```
 ![Картинка 1](./images/lab01/img05.png)
