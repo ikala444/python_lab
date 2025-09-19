@@ -5,4 +5,4 @@ days=0
 if hour>=24:
     days=hour//24
     hour-=days*24
-print(f'Дней: {days} ЧЧ:ММ - {hour}:{min}')
+print(f'Дней: {days} ЧЧ:ММ - {hour:02d}:{min:02d}')
