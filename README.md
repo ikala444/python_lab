@@ -1,3 +1,6 @@
+# Python-labs
+
+
 ## Лабораторная работа 1
 
 ### Задание 1
@@ -58,3 +61,25 @@ fio_full = fio_apart.replace(' ','')
 print(f'Длина (символов): {len(fio_full)+2}')
 ```
 ![Картинка 1](./images/lab01/img05.png)
+
+
+## Лабораторная работа 2
+
+### Задание 5
+```python
+def min_max(nums: list[float | int]) -> tuple[float | int, float | int]:
+    try:
+        return tuple([min(nums), max(nums)])
+    except ValueError:
+        return 'ValueError'
+    
+print(' ')
+print('min max(verstappen)')
+print(min_max([3, -1, 5, 5, 0]))
+print(min_max([42]))
+print(min_max([-5, -2, -9]))
+print(min_max([]))
+print(min_max([1.5, 2, 2.0, -3.1]))
+
+```
+![Картинка 1](./images/lab02/img2_01.png)
