@@ -65,7 +65,7 @@ print(f'Длина (символов): {len(fio_full)+2}')
 
 ## Лабораторная работа 2
 
-### Задание 5
+### Задание 1(a)
 ```python
 def min_max(nums: list[float | int]) -> tuple[float | int, float | int]:
     try:
@@ -74,7 +74,7 @@ def min_max(nums: list[float | int]) -> tuple[float | int, float | int]:
         return 'ValueError'
     
 print(' ')
-print('min max(verstappen)')
+print('min max')
 print(min_max([3, -1, 5, 5, 0]))
 print(min_max([42]))
 print(min_max([-5, -2, -9]))
@@ -83,3 +83,17 @@ print(min_max([1.5, 2, 2.0, -3.1]))
 
 ```
 ![Картинка 1](./images/lab02/img2_01.png)
+
+### Задание 1(b)
+```python
+def unique_sorted(nums: list[float | int]) -> list[float | int]:
+    return sorted(list(set(nums)))
+
+print(' ')
+print('unique sorted')
+print(unique_sorted([3, 1, 2, 1, 3]))
+print(unique_sorted([]))
+print(unique_sorted([-1, -1, 0, 2, 2]))
+print(unique_sorted([1.0, 1, 2.5, 2.5, 0]))
+```
+![Картинка 1](./images/lab02/img2_012.png)
