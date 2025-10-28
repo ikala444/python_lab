@@ -97,3 +97,24 @@ print(unique_sorted([-1, -1, 0, 2, 2]))
 print(unique_sorted([1.0, 1, 2.5, 2.5, 0]))
 ```
 ![Картинка 1](./images/lab02/img2_012.png)
+
+### Задание 1(c)
+```python
+def flatten(mat: list[list | tuple]) -> list:
+    final = list()
+    for i in range(len(mat)):
+        if type(mat[i]) == list or type(mat[i]) == tuple:
+            for j in mat[i]:
+                final.append(j)
+        else:
+            return 'TypeError'
+    return final  
+
+print(' ')
+print('flatten')
+print(flatten([[1, 2], [3, 4]]))
+print(flatten(([1, 2], (3, 4, 5))))
+print(flatten([[1], [], [2, 3]]))
+print(flatten([[1, 2], "ab"]))
+```
+![Картинка 1](./images/lab02/img2_013.png)
