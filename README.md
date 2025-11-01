@@ -276,7 +276,7 @@ import sys
 print(sys.path)
 
 ```
-![Картинка 1](./images/lab02/img3_01.png)
+![Картинка 1](./images/lab03/img3_01.png)
 
 ### Задание 2
 ```python
@@ -293,4 +293,4 @@ print('Топ 5:')
 for word, value in tn:
     print(f'{word}: {value}')
 ```
-![Картинка 1](./images/lab02/img2_03.png)
+![Картинка 1](./images/lab03/img2_03.png)
