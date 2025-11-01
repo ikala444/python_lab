@@ -293,4 +293,4 @@ print('Топ 5:')
 for word, value in tn:
     print(f'{word}: {value}')
 ```
-![Картинка 1](./images/lab03/img3_03.png)
+![Картинка 1](./images/lab03/img3_02.png)
