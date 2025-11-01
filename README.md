@@ -230,7 +230,7 @@ print(format_record(("  сидорова  анна   сергеевна ", "ABB-
 import re
 
 def normalize(text: str, *, casefold: bool = True, yo2e: bool = True) -> str:
-    text = re.sub(r"[\x00-\x1F\x7F]+", " ", text) #перебирает ASCII символы с кодами от 0 до 31, 127
+    text = re.sub(r"[\x00-\x1F\x7F]+", " ", text) 
     text = text.casefold() if casefold else text 
     text = re.sub(r"\s+", " ", text.strip())
     text = text.replace("ё", "е") if yo2e else text
@@ -246,7 +246,7 @@ def tokenize(text: str) -> list[str]:
 def count_freq(tokens: list[str]) -> dict[str, int]:
     counts = {}
     for tok in tokens:
-        counts[tok] = counts.get(tok, 0) + 1 #функция задаёт ключу словаря значение, сначала считает их количество в словаре,а потом добавляет к нему 1 и сохраняет в словаре
+        counts[tok] = counts.get(tok, 0) + 1 
     return counts
 
 def top_n(freq: dict[str, int], n: int = 2) -> list[tuple[str, int]]:
@@ -293,4 +293,4 @@ print('Топ 5:')
 for word, value in tn:
     print(f'{word}: {value}')
 ```
-![Картинка 1](./images/lab03/img2_03.png)
+![Картинка 1](./images/lab03/img3_03.png)
