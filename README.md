@@ -324,5 +324,5 @@ def write_csv(rows: Iterable[Sequence], path: str | Path,
 print(read_text(r"C:\Users\Калачев Иван\Documents\GitHub\python_lab\data\lab04\input.txt"))
 write_csv([("word","count"),("test",3)], r"C:\Users\Калачев Иван\Documents\GitHub\python_lab\data\lab04\check.csv")
 ```
-![Картинка 1](./images/lab03/img4_01.png)
-![Картинка 1](./images/lab03/img4_012.png)
+![Картинка 1](./images/lab04/img4_01.png)
+![Картинка 1](./images/lab04/img4_012.png)
