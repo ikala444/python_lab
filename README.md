@@ -448,3 +448,127 @@ csv_to_xlsx(r"C:\Users\Калачев Иван\Documents\GitHub\python_lab\data\
 ```
 ![Картинка 1](./images/lab05/img5_02.png)
 ![Картинка 1](./images/lab05/img5_022.png)
+
+## Лабортарная работа 6
+
+### Задание 1
+```python
+import argparse
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).parent.parent))
+
+from lab05.json_csv import json_to_csv, csv_to_json
+from lab05.csv_xlsx import csv_to_xlsx
+def main():
+    parser = argparse.ArgumentParser(description="Конвертеры данных")
+    sub = parser.add_subparsers(dest="cmd")
+    p1 = sub.add_parser("json2csv")
+    p1.add_argument("--in", dest="input", required=True)
+    p1.add_argument("--out", dest="output", required=True)
+    p2 = sub.add_parser("csv2json")
+    p2.add_argument("--in", dest="input", required=True)
+    p2.add_argument("--out", dest="output", required=True)
+    p3 = sub.add_parser("csv2xlsx")
+    p3.add_argument("--in", dest="input", required=True)
+    p3.add_argument("--out", dest="output", required=True)
+    args = parser.parse_args()
+    if args.cmd == "json2csv":
+        json_to_csv(args.input, args.output)
+        print(f"Успешно: {args.input} -> {args.output}")
+    elif args.cmd == "csv2json":
+        csv_to_json(args.input, args.output)
+        print(f"Успешно: {args.input} -> {args.output}")
+    elif args.cmd == "csv2xlsx":
+        csv_to_xlsx(args.input, args.output)
+        print(f"Успешно: {args.input} -> {args.output}")
+    else:
+        print("Ошибка: неизвестная команда")
+
+if __name__ == "__main__":
+    main()
+
+
+'''
+json2csv:
+python lаbs\lab06\cli_converter.py json2csv --in data/samples/people.json --out data/out/people.csv
+
+csv2json:
+python lаbs\lab06\cli_converter.py csv2json --in data/samples/people.csv --out data/out/people.json
+
+csv2xlsx:
+python lаbs\lab06\cli_converter.py csv2xlsx --in data/samples/people.csv --out data/out/people.xlsx
+'''
+```
+![Картинка 1](./images/lab06/img6_01.png)
+![Картинка 1](./images/lab06/img6_012.png)
+![Картинка 1](./images/lab06/img6_013.png)
+
+### Задание 2
+```python
+import argparse
+import sys
+from pathlib import Path
+
+def main():
+    parser = argparse.ArgumentParser(description="CLI‑утилиты лабораторной №6")
+    subparsers = parser.add_subparsers(dest="command")
+    
+    cat_parser = subparsers.add_parser("cat", help="Вывести содержимое файла")
+    cat_parser.add_argument("--input", required=True)
+    cat_parser.add_argument("-n", action="store_true", help="Нумеровать строки")
+
+    stats_parser = subparsers.add_parser("stats", help="Частоты слов")
+    stats_parser.add_argument("--input", required=True)
+    stats_parser.add_argument("--top", type=int, default=5)
+
+    args = parser.parse_args()
+
+    if args.command == "cat":
+        try:
+            with open(args.input, 'r', encoding='utf-8') as f:
+                for i, line in enumerate(f, 1):
+                    if args.n:
+                        print(f"{i:4} {line.rstrip()}")
+                    else:
+                        print(line.rstrip())
+        except FileNotFoundError:
+            print(f"Ошибка: файл {args.input} не найден")
+            sys.exit(1)
+            
+    elif args.command == "stats":
+        try:
+            sys.path.append(str(Path(__file__).parent.parent))
+            from mylabs.text import normalize, tokenize, count_freq, top_n
+            
+            with open(args.input, 'r', encoding='utf-8') as f:
+                text = f.read()
+            
+            tokens = tokenize(normalize(text))
+            freq = count_freq(tokens)
+            top_words = top_n(freq, args.top)
+            
+            print(f"Всего слов: {len(tokens)}")
+            print(f"Уникальных слов: {len(freq)}")
+            print(f"Топ-{args.top}:")
+            for word, count in top_words:
+                print(f"{word}: {count}")
+                
+        except FileNotFoundError:
+            print(f"Ошибка: файл {args.input} не найден")
+            sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+
+'''
+cat:
+python lаbs\lab06\cli_text.py cat --input data/samples/people.csv -n
+
+stats:
+python lаbs\lab06\cli_text.py stats --input data/samples/text.txt --top 5
+'''
+```
+![Картинка 1](./images/lab06/img6_02.png)
+![Картинка 1](./images/lab06/img6_022.png)
