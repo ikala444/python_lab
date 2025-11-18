@@ -6,6 +6,8 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from lab05.json_csv import json_to_csv, csv_to_json
 from lab05.csv_xlsx import csv_to_xlsx
+
+
 def main():
     parser = argparse.ArgumentParser(description="Конвертеры данных")
     sub = parser.add_subparsers(dest="cmd")
@@ -31,11 +33,12 @@ def main():
     else:
         print("Ошибка: неизвестная команда")
 
+
 if __name__ == "__main__":
     main()
 
 
-'''
+"""
 json2csv:
 python lаbs\lab06\cli_converter.py json2csv --in data/samples/people.json --out data/out/people.csv
 
@@ -44,4 +47,4 @@ python lаbs\lab06\cli_converter.py csv2json --in data/samples/people.csv --out 
 
 csv2xlsx:
 python lаbs\lab06\cli_converter.py csv2xlsx --in data/samples/people.csv --out data/out/people.xlsx
-'''
+"""
