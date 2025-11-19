@@ -726,8 +726,8 @@ def test_file_not_found_raises(func, tmp_path: Path):
 
 '''
 ```
-![Картинка 1](./images/lab07/img7_02.png)
-![Картинка 1](./images/lab07/img7_022.png)
+![Картинка 1](./images/lab07/img07_02.png)
+![Картинка 1](./images/lab07/img07_022.png)
 
 ## Pytest
 ![Картинка 1](./images/lab07/img07_01.png)
