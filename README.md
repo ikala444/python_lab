@@ -641,8 +641,8 @@ class TestText:
 
 '''
 ```
-![Картинка 1](./images/lab07/img7_01.png)
-![Картинка 1](./images/lab07/img7_012.png)
+![Картинка 1](./images/lab07/img07_01.png)
+![Картинка 1](./images/lab07/img07_012.png)
 
 ### Задание 2
 ```python
@@ -730,8 +730,8 @@ def test_file_not_found_raises(func, tmp_path: Path):
 ![Картинка 1](./images/lab07/img7_022.png)
 
 ## Pytest
-![Картинка 1](./images/lab07/img7_01.png)
+![Картинка 1](./images/lab07/img07_01.png)
 
 ## Black
-![Картинка 1](./images/lab07/img7_03.png)
-![Картинка 1](./images/lab07/img7_04.png)
+![Картинка 1](./images/lab07/img07_03.png)
+![Картинка 1](./images/lab07/img07_04.png)
