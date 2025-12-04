@@ -735,3 +735,140 @@ def test_file_not_found_raises(func, tmp_path: Path):
 ## Black
 ![Картинка 1](./images/lab07/img07_03.png)
 ![Картинка 1](./images/lab07/img07_04.png)
+
+## Лабортарная работа 8
+
+### Задание 1
+```python
+
+from dataclasses import dataclass, field
+from datetime import datetime, date
+
+
+@dataclass
+class Student:
+    fio: str
+    birthdate: str
+    group: str
+    gpa: float
+    
+    def __post_init__(self):
+        try:
+            datetime.strptime(self.birthdate, "%Y-%m-%d")
+        except ValueError:
+            raise ValueError(
+                f"Неверный формат даты: {self.birthdate}. "
+                f"Ожидается YYYY-MM-DD"
+            )
+        
+        if not (0 <= self.gpa <= 5):
+            raise ValueError(
+                f"Средний балл должен быть от 0 до 5. Получено: {self.gpa}"
+            )
+        
+        birth_date = datetime.strptime(self.birthdate, "%Y-%m-%d").date()
+        if birth_date > date.today():
+            raise ValueError(
+                f"Дата рождения не может быть в будущем: {self.birthdate}"
+            )
+    
+    def age(self) -> int:
+        birth_date = datetime.strptime(self.birthdate, "%Y-%m-%d").date()
+        today = date.today()
+        
+        age = today.year - birth_date.year
+        
+        if (today.month, today.day) < (birth_date.month, birth_date.day):
+            age -= 1
+        return age
+    
+    def to_dict(self) -> dict:
+        return {
+            "fio": self.fio,
+            "birthdate": self.birthdate,
+            "group": self.group,
+            "gpa": self.gpa,
+            "age": self.age()
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> "Student":
+        required_fields = ["fio", "birthdate", "group", "gpa"]
+        for field in required_fields:
+            if field not in data:
+                raise ValueError(f"Отсутствует обязательное поле: {field}")
+        
+        return cls(
+            fio=data["fio"],
+            birthdate=data["birthdate"],
+            group=data["group"],
+            gpa=data["gpa"]
+        )
+    
+    def __str__(self) -> str:
+        return (
+            f"Студент: {self.fio}\n"
+            f"Дата рождения: {self.birthdate} (возраст: {self.age()})\n"
+            f"Группа: {self.group}\n"
+            f"Средний балл: {self.gpa:.2f}"
+        )
+```
+![Картинка 1](./images/lab07/img08_01.png)
+![Картинка 1](./images/lab07/img08_012.png)
+
+### Задание 1
+```python
+import json
+from pathlib import Path
+from typing import List
+from models import Student
+
+
+def students_to_json(students: List[Student], path: str) -> None:
+    if not isinstance(students, list):
+        raise TypeError("Ожидается список студентов")
+    
+    if not students:
+        raise ValueError("Список студентов пуст")
+    
+    data = [student.to_dict() for student in students]
+    
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2, default=str)
+    
+    print(f"Сохранено {len(students)} студентов в {path}")
+
+
+def students_from_json(path: str) -> List[Student]:
+    if not Path(path).exists():
+        raise FileNotFoundError(f"Файл не найден: {path}")
+
+    with open(path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    
+    if not isinstance(data, list):
+        raise ValueError("JSON должен содержать массив объектов")
+    
+    students = []
+    errors = []
+    
+    for i, item in enumerate(data, 1):
+        try:
+            student = Student.from_dict(item)
+            students.append(student)
+        except ValueError as e:
+            errors.append(f"Строка {i}: {e}")
+    
+    if errors:
+        print("Обнаружены ошибки при загрузке:")
+        for error in errors:
+            print(f"  - {error}")
+    
+    print(f"Загружено {len(students)} студентов из {path}")
+    return students
+
+```
+![Картинка 1](./images/lab07/img08_02.png)
+![Картинка 1](./images/lab07/img08_022.png)

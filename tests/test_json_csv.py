@@ -8,7 +8,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 # Импортируем из корневой папки
-from lаbs.lab05.json_csv import json_to_csv, csv_to_json
+from labs.lab05.json_csv import json_to_csv, csv_to_json
 
 
 def test_json_to_csv_roundtrip(tmp_path: Path):

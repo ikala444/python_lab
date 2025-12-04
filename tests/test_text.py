@@ -4,7 +4,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from lаbs.mylabs.text import normalize, tokenize, count_freq, top_n
+from labs.mylabs.text import normalize, tokenize, count_freq, top_n
 
 
 class TestText:
