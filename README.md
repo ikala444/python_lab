@@ -813,8 +813,8 @@ class Student:
             f"Средний балл: {self.gpa:.2f}"
         )
 ```
-![Картинка 1](./images/lab07/img08_01.png)
-![Картинка 1](./images/lab07/img08_012.png)
+![Картинка 1](./images/lab08/img08_01.png)
+![Картинка 1](./images/lab08/img08_012.png)
 
 ### Задание 1
 ```python
@@ -870,5 +870,5 @@ def students_from_json(path: str) -> List[Student]:
     return students
 
 ```
-![Картинка 1](./images/lab07/img08_02.png)
-![Картинка 1](./images/lab07/img08_022.png)
+![Картинка 1](./images/lab08/img08_02.png)
+![Картинка 1](./images/lab08/img08_022.png)
