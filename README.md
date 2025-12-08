@@ -872,3 +872,516 @@ def students_from_json(path: str) -> List[Student]:
 ```
 ![Картинка 1](./images/lab08/img08_02.png)
 ![Картинка 1](./images/lab08/img08_022.png)
+
+## Лабортарная работа 8
+
+### Задание 1
+```python
+
+from dataclasses import dataclass, field
+from datetime import datetime, date
+
+
+@dataclass
+class Student:
+    fio: str
+    birthdate: str
+    group: str
+    gpa: float
+    
+    def __post_init__(self):
+        try:
+            datetime.strptime(self.birthdate, "%Y-%m-%d")
+        except ValueError:
+            raise ValueError(
+                f"Неверный формат даты: {self.birthdate}. "
+                f"Ожидается YYYY-MM-DD"
+            )
+        
+        if not (0 <= self.gpa <= 5):
+            raise ValueError(
+                f"Средний балл должен быть от 0 до 5. Получено: {self.gpa}"
+            )
+        
+        birth_date = datetime.strptime(self.birthdate, "%Y-%m-%d").date()
+        if birth_date > date.today():
+            raise ValueError(
+                f"Дата рождения не может быть в будущем: {self.birthdate}"
+            )
+    
+    def age(self) -> int:
+        birth_date = datetime.strptime(self.birthdate, "%Y-%m-%d").date()
+        today = date.today()
+        
+        age = today.year - birth_date.year
+        
+        if (today.month, today.day) < (birth_date.month, birth_date.day):
+            age -= 1
+        return age
+    
+    def to_dict(self) -> dict:
+        return {
+            "fio": self.fio,
+            "birthdate": self.birthdate,
+            "group": self.group,
+            "gpa": self.gpa,
+            "age": self.age()
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> "Student":
+        required_fields = ["fio", "birthdate", "group", "gpa"]
+        for field in required_fields:
+            if field not in data:
+                raise ValueError(f"Отсутствует обязательное поле: {field}")
+        
+        return cls(
+            fio=data["fio"],
+            birthdate=data["birthdate"],
+            group=data["group"],
+            gpa=data["gpa"]
+        )
+    
+    def __str__(self) -> str:
+        return (
+            f"Студент: {self.fio}\n"
+            f"Дата рождения: {self.birthdate} (возраст: {self.age()})\n"
+            f"Группа: {self.group}\n"
+            f"Средний балл: {self.gpa:.2f}"
+        )
+```
+![Картинка 1](./images/lab08/img08_01.png)
+![Картинка 1](./images/lab08/img08_012.png)
+
+## Лабортарная работа 8
+
+```python
+import csv
+from pathlib import Path
+from typing import List, Dict, Any
+import sys
+import os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+from labs.lab08.models import Student
+
+class Group: #инициализирует объект группы студентов
+    def __init__(self, storage_path: str):
+        self.path = Path("data/lab09") / storage_path # Создаем полный путь к файлу в data/lab09
+        self._ensure_storage_exists() # Гарантируем, что файл хранилища существует (создаем если нет)
+    
+    def _ensure_storage_exists(self):# Внутренний метод для создания файла хранилища при его отсутствии
+        self.path.parent.mkdir(parents=True, exist_ok=True) # Создаем папку data/lab09 если её нет
+        
+        if not self.path.exists():
+            with open(self.path, 'w', encoding='utf-8', newline='') as f:
+                writer = csv.DictWriter(f, fieldnames=['fio', 'birthdate', 'group', 'gpa'])
+                writer.writeheader()
+    
+    def _read_all(self) -> List[Dict[str, Any]]: # Прочитать все строки из CSV
+        rows = []
+        with open(self.path, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                row['gpa'] = float(row['gpa'])
+                rows.append(row)
+        return rows
+    
+    def _write_all(self, rows: List[Dict[str, Any]]): # Записать все строки в CSV
+        with open(self.path, 'w', encoding='utf-8', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=['fio', 'birthdate', 'group', 'gpa'])
+            writer.writeheader()
+            writer.writerows(rows)
+    
+    def list(self) -> List[Student]: # Вернуть всех студентов в виде списка Student
+        rows = self._read_all()
+        students = []
+        for row in rows:
+            try:
+                student = Student.from_dict(row)
+                students.append(student)
+            except ValueError as e:
+                print(f"Ошибка валидации студента {row['fio']}: {e}")
+        return students
+    
+    def add(self, student: Student): # Добавить нового студента в CSV
+        try:
+            validated_student = Student(
+                fio=student.fio,
+                birthdate=student.birthdate,
+                group=student.group,
+                gpa=student.gpa
+            )
+        except ValueError as e:
+            raise ValueError(f"Некорректные данные студента: {e}")
+        
+        # СОЗДАЁМ СЛОВАРЬ ТОЛЬКО С НУЖНЫМИ ДЛЯ CSV ПОЛЯМИ
+        student_dict = {
+            'fio': validated_student.fio,
+            'birthdate': validated_student.birthdate,
+            'group': validated_student.group,
+            'gpa': validated_student.gpa
+        }
+        
+        with open(self.path, 'a', encoding='utf-8', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=['fio', 'birthdate', 'group', 'gpa'])
+            writer.writerow(student_dict)  # ← Теперь передаём правильный словарь
+    
+    def find(self, substr: str) -> List[Student]: # Найти студентов по подстроке в fio
+        students = self.list()
+        return [student for student in students if substr.lower() in student.fio.lower()]
+    
+    def remove(self, fio: str): # Удалить запись(и) с данным fio
+        rows = self._read_all()
+        updated_rows = [row for row in rows if row['fio'] != fio]
+        
+        if len(updated_rows) == len(rows):
+            raise ValueError(f"Студент с ФИО '{fio}' не найден")
+        
+        self._write_all(updated_rows)
+    
+    def update(self, fio: str, **fields): # Обновить поля существующего студента
+        rows = self._read_all()
+        updated = False
+        
+        for row in rows:
+            if row['fio'] == fio:
+                for field, value in fields.items():
+                    if field in ['fio', 'birthdate', 'group', 'gpa']:
+                        row[field] = value
+                updated = True
+                try:
+                    Student.from_dict(row)
+                except ValueError as e:
+                    raise ValueError(f"Некорректные данные после обновления: {e}")
+        
+        if not updated:
+            raise ValueError(f"Студент с ФИО '{fio}' не найден")
+        
+        self._write_all(rows)
+    
+    def stats(self) -> Dict[str, Any]: # Статистика по группе
+        students = self.list()
+        
+        if not students:
+            return {
+                "count": 0,
+                "min_gpa": 0,
+                "max_gpa": 0,
+                "avg_gpa": 0,
+                "groups": {},
+                "top_5_students": []
+            }
+        
+        gpas = [student.gpa for student in students]
+        groups_stats = {}
+        for student in students:
+            groups_stats[student.group] = groups_stats.get(student.group, 0) + 1
+        
+        sorted_students = sorted(students, key=lambda s: s.gpa, reverse=True)
+        top_5 = [{"fio": s.fio, "gpa": s.gpa} for s in sorted_students[:5]]
+        
+        return {
+            "count": len(students),
+            "min_gpa": min(gpas),
+            "max_gpa": max(gpas),
+            "avg_gpa": round(sum(gpas) / len(gpas), 2),
+            "groups": groups_stats,
+            "top_5_students": top_5
+        }
+    
+    def exists(self, fio: str) -> bool: # Проверить существует ли студент с таким ФИО
+        students = self.list()
+        return any(student.fio == fio for student in students)
+
+    def is_empty(self) -> bool: # Проверить пуст ли файл (только заголовок)
+        with open(self.path, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            return len(list(reader)) == 0
+    
+if __name__ == "__main__":
+    group = Group("students.csv")
+    print(f"Путь к файлу: {group.path}")  # ← добавь эту строку
+    print(f"Файл существует: {group.path.exists()}")
+    if group.is_empty():
+        students_to_add = [
+            Student("Иванов Иван", "2000-05-15", "БИВТ-21-1", 4.5),
+            Student("Петрова Анна", "2001-12-03", "БИВТ-21-2", 3.8),
+            Student("Сидоров Алексей", "1999-08-22", "БИВТ-21-1", 4.2),
+            Student("Козлова Мария", "2002-03-10", "БИВТ-21-3", 4.8),
+            Student("Новиков Дмитрий", "2000-11-25", "БИВТ-21-2", 3.5),
+            Student("Иванова Ольга", "2001-07-14", "БИВТ-21-1", 4.9)
+        ]
+        
+        for student in students_to_add:
+            group.add(student)
+            print(f"    Добавлен: {student.fio}")
+    else:
+        print("Файл уже содержит данные")
+    
+    # Тестируем методы
+    print("\n=== Все студенты ===")
+    for student in group.list():
+        print(f"  {student}")
+    
+    print("\n=== Поиск по 'Иванов' ===")
+    for student in group.find("Иванов"):
+        print(f"  {student}")
+    
+    print("\n=== Статистика ===")
+    stats = group.stats()
+    print(f"  Всего студентов: {stats['count']}")
+    print(f"  Минимальный GPA: {stats['min_gpa']}")
+    print(f"  Максимальный GPA: {stats['max_gpa']}")
+    print(f"  Средний GPA: {stats['avg_gpa']}")
+    print(f"  Распределение по группам: {stats['groups']}")
+    print(f"  Топ-5 студентов:")
+    for student in stats['top_5_students']:
+        print(f"    {student['fio']} - GPA: {student['gpa']}")
+group.remove("Новиков Дмитрий")
+print(f"\nПосле удаления Новикова, всего студентов: {len(group.list())}")
+```
+![Картинка 1](./images/lab09/img09_1.png)
+![Картинка 1](./images/lab09/img09_2.png)
+![Картинка 1](./images/lab09/img09_3.png)
+![Картинка 1](./images/lab09/img09_4.png)
+
+## Лабортарная работа 9
+
+### A
+
+```python
+from collections import deque
+from typing import Any, Optional
+
+class Stack: # Структура данных 'Стек' (LIFO - Last In First Out)
+    def __init__(self): # Инициализация пустого стека
+        self._data = []
+    
+    def push(self, item: Any) -> None: # Добавить элемент на вершину стека
+        self._data.append(item) # item: Элемент для добавления
+    
+    def pop(self) -> Any: # Снять верхний элемент стека и вернуть его
+        if self.is_empty(): # IndexError: Если стек пуст
+            raise IndexError("Невозможно извлечь элемент: стек пуст")
+        return self._data.pop()
+    
+    def peek(self) -> Optional[Any]: # Вернуть верхний элемент без удаления
+        if self.is_empty():
+            return None # Верхний элемент стека или None если стек пуст
+        return self._data[-1]
+    
+    def is_empty(self) -> bool: # Проверить пуст ли стек
+        return len(self._data) == 0 # True если стек пуст, иначе False
+    
+    def __len__(self) -> int: # Количество элементов в стеке
+        return len(self._data) # Количество элементов
+    
+    def __str__(self) -> str: # Строковое представление стека
+        return f"Stack({self._data})"
+    
+    def __repr__(self) -> str:
+        return str(self)
+
+class Queue: # Структура данных 'Очередь' (FIFO - First In First Out)    
+    def __init__(self): # Инициализация пустой очереди
+        self._data = deque()
+    
+    def enqueue(self, item: Any) -> None: # Добавить элемент в конец очереди
+        self._data.append(item) # item: Элемент для добавления
+    
+    def dequeue(self) -> Any: # Взять элемент из начала очереди
+        if self.is_empty():
+            raise IndexError("Невозможно извлечь элемент: очередь пуста") # IndexError: Если очередь пуста
+        return self._data.popleft()
+    
+    def peek(self) -> Optional[Any]: # Вернуть первый элемент без удаления
+        if self.is_empty():
+            return None # Первый элемент очереди или None если очередь пуста
+        return self._data[0]
+    
+    def is_empty(self) -> bool: # Проверить пуста ли очередь
+        return len(self._data) == 0 # True если очередь пуста, иначе False
+    
+    def __len__(self) -> int: # Количество элементов в очереди
+        return len(self._data) # Количество элементов
+    
+    def __str__(self) -> str: # Строковое представление очереди
+        return f"Queue({list(self._data)})"
+    
+    def __repr__(self) -> str:
+        return str(self)
+```
+### B
+
+```python
+from typing import Any, Optional, Iterator
+
+class Node: # Узел односвязного списка
+    def __init__(self, value: Any, next_node: Optional['Node'] = None): # Инициализация узла
+        self.value = value # value: Значение узла
+        self.next = next_node # next_node: Ссылка на следующий узел
+    
+    def __str__(self) -> str: # Строковое представление узла
+        return f"[{self.value}]"
+    
+    def __repr__(self) -> str:
+        return str(self)
+
+class SinglyLinkedList: # Односвязный список
+    def __init__(self): # Инициализация пустого списка
+        self.head = None
+        self.tail = None # Для ускорения операций с концом списка
+        self._size = 0
+    
+    def append(self, value: Any) -> None: # Добавить элемент в конец списка
+        new_node = Node(value) # value: Значение для добавления
+        
+        if self.head is None: # Если список пуст
+            self.head = new_node
+            self.tail = new_node
+        else: # Если в списке уже есть элементы
+            self.tail.next = new_node
+            self.tail = new_node
+        
+        self._size += 1
+    
+    def prepend(self, value: Any) -> None: # Добавить элемент в начало списка
+        new_node = Node(value, self.head) # value: Значение для добавления
+        self.head = new_node
+        
+        if self.tail is None: # Если список был пуст
+            self.tail = new_node
+        
+        self._size += 1
+    
+    def insert(self, idx: int, value: Any) -> None: # Вставить элемент по указанному индексу
+                                                    # idx: Индекс для вставки (0 <= idx <= len(list))
+                                                    # value: Значение для вставки
+        if idx < 0 or idx > self._size:
+            raise IndexError(f"Индекс {idx} вне диапазона [0, {self._size}]") # IndexError: Если индекс вне допустимого диапазона
+        
+        if idx == 0:
+            self.prepend(value)
+            return
+        
+        if idx == self._size:
+            self.append(value)
+            return
+        
+        # Вставка в середину списка
+        current = self.head
+        for _ in range(idx - 1):
+            current = current.next
+        
+        new_node = Node(value, current.next)
+        current.next = new_node
+        self._size += 1
+    
+    def remove(self, value: Any) -> bool: # Удалить первое вхождение значения
+                                          # value: Значение для удаления
+        if self.head is None: # True если элемент был найден и удален, иначе False
+            return False
+        
+        # Если нужно удалить первый элемент
+        if self.head.value == value:
+            self.head = self.head.next
+            if self.head is None:  # Если список стал пустым
+                self.tail = None
+            self._size -= 1
+            return True
+        
+        # Поиск элемента для удаления
+        current = self.head
+        while current.next is not None and current.next.value != value:
+            current = current.next
+        
+        if current.next is None: # Элемент не найден
+            return False
+        
+        # Удаление найденного элемента
+        if current.next == self.tail: # Если удаляем последний элемент
+            self.tail = current
+        
+        current.next = current.next.next
+        self._size -= 1
+        return True
+    
+    def remove_at(self, idx: int) -> Any: # Удалить элемент по индексу
+                                          # idx: Индекс элемента для удаления
+        if idx < 0 or idx >= self._size:
+            raise IndexError(f"Индекс {idx} вне диапазона [0, {self._size})") # IndexError: Если индекс вне допустимого диапазона
+        
+        if idx == 0: # Удаление первого элемента
+            value = self.head.value
+            self.head = self.head.next
+            if self.head is None:
+                self.tail = None
+            self._size -= 1
+            return value
+        
+        # Удаление из середины или конца
+        current = self.head
+        for _ in range(idx - 1):
+            current = current.next
+        
+        value = current.next.value
+        
+        if current.next == self.tail: # Если удаляем последний элемент
+            self.tail = current
+        
+        current.next = current.next.next
+        self._size -= 1
+        return value
+    
+    def get(self, idx: int) -> Any: # Получить элемент по индексу
+                                    # idx: Индекс элемента
+        if idx < 0 or idx >= self._size:
+            raise IndexError(f"Индекс {idx} вне диапазона [0, {self._size})") # IndexError: Если индекс вне допустимого диапазона
+        
+        current = self.head
+        for _ in range(idx):
+            current = current.next
+        
+        return current.value
+    
+    def __iter__(self) -> Iterator[Any]: # Итератор по значениям списка
+                                         # Значения списка в порядке от головы к хвосту
+        current = self.head
+        while current is not None:
+            yield current.value
+            current = current.next
+    
+    def __len__(self) -> int: # Количество элементов в списке
+        return self._size
+    
+    def __str__(self) -> str: # Красивое строковое представление списка
+        if self.head is None:
+            return "None"
+        
+        parts = []
+        current = self.head
+        while current is not None:
+            parts.append(str(current))
+            current = current.next
+
+        return " -> ".join(parts) + " -> None"
+    
+    def __repr__(self) -> str: # Формальное строковое представление списка
+        values = list(self)
+        return f"SinglyLinkedList({values})"
+    
+    def is_empty(self) -> bool: # Проверить пуст ли список
+        return self._size == 0 # True если список пуст, иначе False
+    
+if __name__ == "__main__":
+   # Пример использования
+   lst = SinglyLinkedList()
+   lst.append(1)
+   lst.append(2)
+   lst.prepend(0)
+   lst.insert(2, 1.5)
+   lst.remove_at(3)
+   print(lst)
+```
+![Картинка 1](./images/lab10/img10_1.png)
